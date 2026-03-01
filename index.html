@@ -621,14 +621,27 @@ async function generatePDF(){
     margin:{left:M,right:M}});
 
   // 合計ボックス（線と文字が重ならないように調整）
-  const lY = doc.lastAutoTable.finalY;
+  // ── ここだけ修正：ページ残量チェックを追加 ──
+  let lY = doc.lastAutoTable.finalY;
   const isTN = d.mode === "totalnone";
-  const sbW = 90, sbX = W - M - sbW, sbY = lY + 6;
+  const sbW = 90, sbX = W - M - sbW;
 
   const rowH = 9;
   const topPad = 8;
   const nR = isTN ? 2 : 3;
   const sbH = rowH * nR + 12;
+
+  const PAGE_H = 297;
+  const BOTTOM_MARGIN = 14;
+  const neededH = 6 + sbH + 16 + BOTTOM_MARGIN; // gap + box + note + margin
+
+  if (lY + neededH > PAGE_H) {
+    doc.addPage();
+    lY = M;
+  }
+
+  const sbY = lY + 6;
+  // ── 修正ここまで ──
 
   doc.setDrawColor(204);
   doc.setLineWidth(0.3);
