@@ -58,9 +58,6 @@
     .btn-mini{padding:9px 14px;border-radius:10px;font-weight:800;}
     .hint{font-size:12px;color:var(--muted);}
 
-
-
-
     .grid{display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:16px;align-items:start;}
     @media(max-width:900px){.grid{grid-template-columns:1fr;}}
     .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);}
@@ -89,6 +86,18 @@
 
     .pill{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px dashed var(--accent2);border-radius:14px;background:linear-gradient(135deg,#eef4fb 0%,#e8f0f9 100%);margin-top:12px;}
     .footer-note{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.8;}
+
+    /* 返戻率に関する説明（作者向け） */
+    .rate-note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.8;
+    }
+    .rate-note .pct{
+      font-weight:900;
+      color:var(--deep);
+    }
 
     .table-wrap{border:1px solid var(--line);border-radius:14px;background:#fff;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     table{width:100%;border-collapse:collapse;background:#fff;table-layout:fixed;}
@@ -218,9 +227,6 @@
     </div>
   </div>
 
-
-
-
   <div class="grid">
     <!-- 左カラム：基本情報 -->
     <div class="card">
@@ -277,6 +283,13 @@
           <div class="v" id="returnAmt">0 円</div>
         </div>
       </div>
+
+      <!-- 作者向け補足（返戻率と同期） -->
+      <p class="rate-note">
+        当店では、海外向け取り扱いのため、作品価格の
+        <span class="pct"><span id="rateText">88</span>%</span>
+        を仕入れ基準額（卸価格）として設定しております。
+      </p>
 
       <div class="footer-note">
         ※「税込」「税抜」のどちらか分かる場合は該当する方をお選びください。<br/>
@@ -418,6 +431,15 @@ document.getElementById("addRowBtn").addEventListener("click",()=>addRows(1));
 modeSel.addEventListener("change",recalc);
 document.getElementById("returnRate").addEventListener("input",recalc);
 
+// ===== RATE NOTE SYNC (UI) =====
+const rateInputEl = document.getElementById("returnRate");
+const rateTextEl = document.getElementById("rateText");
+function syncRateNote(){
+  if(rateTextEl) rateTextEl.textContent = String(rateInputEl?.value ?? "88");
+}
+rateInputEl?.addEventListener("input", syncRateNote);
+syncRateNote();
+
 // ===== RESET =====
 document.getElementById("clearBtn").addEventListener("click",()=>{
   if(!confirm("入力内容をリセットします。よろしいですか？"))return;
@@ -430,6 +452,7 @@ document.getElementById("clearBtn").addEventListener("click",()=>{
   document.getElementById("transferDate").value="";
   document.getElementById("returnRate").value="88";
   modeSel.value="taxin"; tbody.innerHTML=""; addRows(6);
+  syncRateNote();
 });
 
 // ===== PRINT =====
@@ -633,6 +656,16 @@ doc.setTextColor(58, 110, 168);
 doc.setFontSize(12);
 doc.text(`${formatNumber(d.total)} 円`, sbX + sbW - 4, grandY, { align: "right" });
 
+// ===== RATE NOTE (PDF) =====
+const note = `当店では、海外向け取り扱いのため、作品価格の ${d.rateVal}% を仕入れ基準額（卸価格）として設定しております。`;
+doc.setFont("NotoSansJP","normal");
+doc.setFontSize(8.5);
+doc.setTextColor(120);
+// 放在「合計ボックス」の少し下（不挤，不抢眼）
+const noteY = Math.min(285, grandY + 8);
+doc.text(note, M, noteY, { maxWidth: W - M*2 });
+doc.setTextColor(17);
+
   doc.save(makePdfFilename());
 }
 
@@ -649,6 +682,8 @@ document.getElementById("pdfBtn").addEventListener("click",handlePDF);
 const d=new Date();
 document.getElementById("docDate").value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 addRows(6);
+recalc();
+syncRateNote();
 </script>
 </body>
 </html>
