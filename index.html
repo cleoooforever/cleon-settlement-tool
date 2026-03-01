@@ -58,9 +58,6 @@
     .btn-mini{padding:9px 14px;border-radius:10px;font-weight:800;}
     .hint{font-size:12px;color:var(--muted);}
 
-
-
-
     .grid{display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:16px;align-items:start;}
     @media(max-width:900px){.grid{grid-template-columns:1fr;}}
     .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);}
@@ -89,6 +86,18 @@
 
     .pill{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px dashed var(--accent2);border-radius:14px;background:linear-gradient(135deg,#eef4fb 0%,#e8f0f9 100%);margin-top:12px;}
     .footer-note{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.8;}
+
+    /* 返戻率に関する説明（作者向け） */
+    .rate-note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.8;
+    }
+    .rate-note .pct{
+      font-weight:900;
+      color:var(--deep);
+    }
 
     .table-wrap{border:1px solid var(--line);border-radius:14px;background:#fff;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     table{width:100%;border-collapse:collapse;background:#fff;table-layout:fixed;}
@@ -208,7 +217,6 @@
       <div class="brand-text">
         <h1>販売清算確認書</h1>
         <div class="sub">澄和創藝合同会社　|　Sales Settlement Confirmation</div>
-        <div class="sub" style="margin-top:2px;">〒185-0032 東京都国分寺市日吉町2-34-14 2G号室</div>
       </div>
     </div>
     <div class="actions">
@@ -218,9 +226,6 @@
       <span class="hint" id="pdfHint"></span>
     </div>
   </div>
-
-
-
 
   <div class="grid">
     <!-- 左カラム：基本情報 -->
@@ -236,7 +241,7 @@
       </div>
       <div class="row"><label>清算書番号（任意）</label><input id="docNo" placeholder="例：2026-001" data-ph="例：2026-001" /></div>
       <div class="row"><label>作成日</label><input id="docDate" type="date" /></div>
-      <div class="row"><label>作家名</label><input id="authorName" placeholder="例：澄和 花子" data-ph="例：澄和 花子" /></div>
+      <div class="row"><label>姓名</label><input id="authorName" placeholder="例：澄和 花子" data-ph="例：澄和 花子" /></div>
       <div class="row"><label>屋号</label><input id="shopName" placeholder="例：atelier hanako" data-ph="例：atelier hanako" /></div>
       <div class="row"><label>納品番号</label><input id="deliveryNos" placeholder="例：20251121-001, 20251212-001" data-ph="例：20251121-001, 20251212-001" /></div>
       <div class="row"><label>販売期間（開始）</label><input id="periodFrom" type="date" /></div>
@@ -278,6 +283,13 @@
           <div class="v" id="returnAmt">0 円</div>
         </div>
       </div>
+
+      <!-- 作者向け補足（返戻率と同期） -->
+      <p class="rate-note">
+        当店では、海外向け取り扱いのため、作品価格の
+        <span class="pct"><span id="rateText">88</span>%</span>
+        を仕入れ基準額（卸価格）として設定しております。
+      </p>
 
       <div class="footer-note">
         ※「税込」「税抜」のどちらか分かる場合は該当する方をお選びください。<br/>
@@ -419,6 +431,15 @@ document.getElementById("addRowBtn").addEventListener("click",()=>addRows(1));
 modeSel.addEventListener("change",recalc);
 document.getElementById("returnRate").addEventListener("input",recalc);
 
+// ===== RATE NOTE SYNC (UI) =====
+const rateInputEl = document.getElementById("returnRate");
+const rateTextEl = document.getElementById("rateText");
+function syncRateNote(){
+  if(rateTextEl) rateTextEl.textContent = String(rateInputEl?.value ?? "88");
+}
+rateInputEl?.addEventListener("input", syncRateNote);
+syncRateNote();
+
 // ===== RESET =====
 document.getElementById("clearBtn").addEventListener("click",()=>{
   if(!confirm("入力内容をリセットします。よろしいですか？"))return;
@@ -431,6 +452,7 @@ document.getElementById("clearBtn").addEventListener("click",()=>{
   document.getElementById("transferDate").value="";
   document.getElementById("returnRate").value="88";
   modeSel.value="taxin"; tbody.innerHTML=""; addRows(6);
+  syncRateNote();
 });
 
 // ===== PRINT =====
@@ -518,8 +540,7 @@ async function generatePDF(){
 
   const hX=logoLoaded?54:M;
   doc.setFont("NotoSansJP","bold");doc.setFontSize(20);doc.text("販売清算確認書",hX,18);
-  doc.setFont("NotoSansJP","normal");doc.setFontSize(11);doc.setTextColor(85);doc.text("澄和創藝合同会社　Cléon国分寺店",hX,24);
-  doc.setFontSize(9);doc.text("〒185-0032 東京都国分寺市日吉町2-34-14 2G号室",hX,29);doc.setTextColor(17);
+  doc.setFont("NotoSansJP","normal");doc.setFontSize(11);doc.setTextColor(85);doc.text("澄和創藝合同会社　Cléon国分寺店",hX,24);doc.setTextColor(17);
 
   const d=collectData();
   const modeLabel=d.mode==="taxex"?"税抜（10%別）":d.mode==="totalnone"?"総額（税区分なし）":"税込（10%込）";
@@ -527,17 +548,17 @@ async function generatePDF(){
 
   const infoBody=[
     ["店舗情報","Cléon国分寺店　澄和創藝合同会社"],
-    ["清算書番号",d.docNo||"—"],
+    ["清算書番号（任意）",d.docNo||"—"],
     ["作成日",d.docDate?fmtDate(d.docDate):"—"],
     ["作家名",d.author||"—"],
     ["屋号",d.shop||"—"],
-    ["納品番号",d.deliveryNos||"—"],
+    ["納品書番号",d.deliveryNos||"—"],
     ["販売期間",d.periodStr],
     ["振込予定日",d.transferDate],
   ];
   if(d.memo)infoBody.push(["備考",d.memo]);
 
-  doc.autoTable({startY:34,theme:"grid",head:[],body:infoBody,
+  doc.autoTable({startY:30,theme:"grid",head:[],body:infoBody,
     styles:{font:"NotoSansJP",fontStyle:"normal",fontSize:10,cellPadding:2.2,lineColor:170,lineWidth:0.2,valign:"top"},
     columnStyles:{0:{cellWidth:36,textColor:[85,85,85],fontStyle:"bold"},1:{cellWidth:W-M*2-36}},
     margin:{left:M,right:M}});
@@ -581,28 +602,69 @@ async function generatePDF(){
     columnStyles:{0:{cellWidth:cNo,halign:"center"},1:{cellWidth:cName,halign:"left"},2:{cellWidth:cUnit,halign:"right"},3:{cellWidth:cQty,halign:"right"},4:{cellWidth:cAmt,halign:"right"}},
     margin:{left:M,right:M}});
 
-  // 合計ボックス
-  const lY=doc.lastAutoTable.finalY;
-  const isTN=d.mode==="totalnone";
-  const sbW=90, sbX=W-M-sbW, sbY=lY+6;
-  const nR=isTN?2:3; const lH=8; const sbH=lH*nR+10;
-  doc.setDrawColor(204);doc.setLineWidth(0.3);doc.roundedRect(sbX,sbY,sbW,sbH,2,2);
+ // 合計ボックス（線と文字が重ならないように調整）
+const lY = doc.lastAutoTable.finalY;
+const isTN = d.mode === "totalnone";
+const sbW = 90, sbX = W - M - sbW, sbY = lY + 6;
 
-  const sumRows=isTN
-    ?[["入力方式",modeLabel],["お支払い金額",`${formatNumber(d.total)} 円`]]
-    :[["入力方式",modeLabel],[`小計`,`${formatNumber(d.sub)} 円`],[`うち消費税`,`${formatNumber(d.tax)} 円`]];
+// 行の高さと上余白を少しだけ増やして、分割線は「行の中間」に置く
+const rowH = 9;          // ← 少し高く
+const topPad = 8;        // ← 文字を下げる
+const nR = isTN ? 2 : 3;
+const sbH = rowH * nR + 12;
 
-  doc.setFontSize(9.5);
-  sumRows.forEach((r,i)=>{
-    const y=sbY+7+i*lH;
-    if(i>0){doc.setDrawColor(224);doc.line(sbX,y-2,sbX+sbW,y-2);}
-    doc.setFont("NotoSansJP","normal");doc.setTextColor(100);doc.text(r[0],sbX+4,y);
-    doc.setFont("NotoSansJP","bold");doc.setTextColor(17);doc.text(r[1],sbX+sbW-4,y,{align:"right"});
-  });
-  const grandY=sbY+sbH-5;
-  doc.setDrawColor(180);doc.line(sbX,grandY-5,sbX+sbW,grandY-5);
-  doc.setFont("NotoSansJP","bold");doc.setFontSize(10);doc.setTextColor(17);doc.text("合計（販売総額）",sbX+4,grandY);
-  doc.setTextColor(58,110,168);doc.setFontSize(12);doc.text(`${formatNumber(d.total)} 円`,sbX+sbW-4,grandY,{align:"right"});
+doc.setDrawColor(204);
+doc.setLineWidth(0.3);
+doc.roundedRect(sbX, sbY, sbW, sbH, 2, 2);
+
+const sumRows = isTN
+  ? [["入力方式", modeLabel], ["お支払い金額", `${formatNumber(d.total)} 円`]]
+  : [["入力方式", modeLabel], ["小計", `${formatNumber(d.sub)} 円`], ["うち消費税", `${formatNumber(d.tax)} 円`]];
+
+doc.setFontSize(9.5);
+
+sumRows.forEach((r, i) => {
+  const yText = sbY + topPad + i * rowH; // ← 文字のY
+  if (i > 0) {
+    // 分割線は「前行と次行のちょうど中間」に置くと重なりにくい
+    const yLine = sbY + topPad + i * rowH - rowH / 2;
+    doc.setDrawColor(224);
+    doc.setLineWidth(0.2);
+    doc.line(sbX, yLine, sbX + sbW, yLine);
+  }
+  doc.setFont("NotoSansJP", "normal");
+  doc.setTextColor(100);
+  doc.text(r[0], sbX + 4, yText);
+
+  doc.setFont("NotoSansJP", "bold");
+  doc.setTextColor(17);
+  doc.text(r[1], sbX + sbW - 4, yText, { align: "right" });
+});
+
+// 合計（販売総額）
+const grandY = sbY + sbH - 5;
+doc.setDrawColor(180);
+doc.setLineWidth(0.3);
+doc.line(sbX, grandY - 6, sbX + sbW, grandY - 6);
+
+doc.setFont("NotoSansJP", "bold");
+doc.setFontSize(10);
+doc.setTextColor(17);
+doc.text("合計（販売総額）", sbX + 4, grandY);
+
+doc.setTextColor(58, 110, 168);
+doc.setFontSize(12);
+doc.text(`${formatNumber(d.total)} 円`, sbX + sbW - 4, grandY, { align: "right" });
+
+// ===== RATE NOTE (PDF) =====
+const note = `当店では海外向け取扱いに伴い、納品書記載の販売価格の ${d.rateVal}% を仕入れ基準額（卸価格）として設定しております。`;
+doc.setFont("NotoSansJP","normal");
+doc.setFontSize(8.5);
+doc.setTextColor(120);
+// 放在「合計ボックス」の少し下（不挤，不抢眼）
+const noteY = Math.min(285, grandY + 16);
+doc.text(note, M, noteY, { maxWidth: W - M*2 });
+doc.setTextColor(17);
 
   doc.save(makePdfFilename());
 }
@@ -620,6 +682,8 @@ document.getElementById("pdfBtn").addEventListener("click",handlePDF);
 const d=new Date();
 document.getElementById("docDate").value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 addRows(6);
+recalc();
+syncRateNote();
 </script>
 </body>
 </html>
