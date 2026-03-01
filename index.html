@@ -694,6 +694,18 @@ async function generatePDF(){
   doc.text(note, M, noteY, { maxWidth: W - M*2 });
   doc.setTextColor(17);
 
+  // ── ページ番号（新規追加）─────────────────────────────────────────
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFont("NotoSansJP", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text(`${p} / ${totalPages}`, M, PAGE_H - 5);
+  }
+  doc.setTextColor(17);
+  // ─────────────────────────────────────────────────────────────────
+
   doc.save(makePdfFilename());
 }
 
