@@ -106,14 +106,16 @@
 
     .sum{margin-top:14px;display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start;}
     @media(max-width:900px){.sum{grid-template-columns:1fr;}}
-    .sum-box{border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
-    .sum-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;background:#fff;}
-    .sum-row:last-child{border-bottom:none;}
-    .sum-row .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.3px;}
+    .sum-box{border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(20,40,80,.13);}
+    .sum-box-inner{background:#fff;padding:6px 0 0;}
+    .sum-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 20px;font-variant-numeric:tabular-nums;position:relative;}
+    .sum-row+.sum-row::before{content:'';position:absolute;top:0;left:20px;right:20px;height:1px;background:var(--line);}
+    .sum-row .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.4px;}
     .sum-row .v{font-weight:800;font-size:14px;color:var(--deep);}
-    .sum-row.grand{background:linear-gradient(135deg,var(--deep) 0%,#2a4a6a 100%);padding:14px 16px;}
-    .sum-row.grand .k{color:rgba(255,255,255,.7);font-size:13px;font-weight:700;}
-    .sum-row.grand .v{font-size:18px;color:#fff;font-weight:900;letter-spacing:.5px;}
+    .sum-row.grand{background:linear-gradient(135deg,#1a2a3a 0%,#2a4a6a 100%);margin-top:6px;padding:18px 20px;}
+    .sum-row.grand::before{display:none;}
+    .sum-row.grand .k{color:rgba(255,255,255,.65);font-size:13px;font-weight:700;letter-spacing:.5px;}
+    .sum-row.grand .v{font-size:20px;color:#fff;font-weight:900;letter-spacing:.5px;text-shadow:0 2px 8px rgba(0,0,0,.2);}
     .mode-badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;background:#dbeafe;color:#1d4ed8;letter-spacing:.3px;}
     .mode-badge.taxex{background:#fff3e0;color:#c07000;}
     .mode-badge.totalnone{background:#f0ebff;color:#6b3fa0;}
@@ -300,9 +302,11 @@
           ※ 税込入力時：合計は入力金額の合算、内訳として小計と内消費税を算出します。
         </div>
         <div class="sum-box">
-          <div class="sum-row"><div class="k">入力方式</div><div class="v"><span class="mode-badge" id="modeBadge">税込（10%込）</span></div></div>
-          <div class="sum-row"><div class="k">小計</div><div class="v" id="subTotal">0 円</div></div>
-          <div class="sum-row" id="taxRow"><div class="k">うち消費税</div><div class="v" id="tax">0 円</div></div>
+          <div class="sum-box-inner">
+            <div class="sum-row"><div class="k">入力方式</div><div class="v"><span class="mode-badge" id="modeBadge">税込（10%込）</span></div></div>
+            <div class="sum-row"><div class="k">小計</div><div class="v" id="subTotal">0 円</div></div>
+            <div class="sum-row" id="taxRow"><div class="k">うち消費税</div><div class="v" id="tax">0 円</div></div>
+          </div>
           <div class="sum-row grand"><div class="k">合計（販売総額）</div><div class="v" id="grandTotal">0 円</div></div>
         </div>
       </div>
