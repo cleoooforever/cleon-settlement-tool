@@ -548,11 +548,11 @@ async function generatePDF(){
 
   const infoBody=[
     ["店舗情報","Cléon国分寺店　澄和創藝合同会社"],
-    ["納品書番号",d.docNo||"—"],
+    ["清算書番号（任意）",d.docNo||"—"],
     ["作成日",d.docDate?fmtDate(d.docDate):"—"],
     ["作家名",d.author||"—"],
     ["屋号",d.shop||"—"],
-    ["納品番号",d.deliveryNos||"—"],
+    ["納品書番号",d.deliveryNos||"—"],
     ["販売期間",d.periodStr],
     ["振込予定日",d.transferDate],
   ];
