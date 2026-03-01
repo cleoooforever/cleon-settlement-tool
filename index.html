@@ -241,7 +241,7 @@
       </div>
       <div class="row"><label>清算書番号（任意）</label><input id="docNo" placeholder="例：2026-001" data-ph="例：2026-001" /></div>
       <div class="row"><label>作成日</label><input id="docDate" type="date" /></div>
-      <div class="row"><label>作家名</label><input id="authorName" placeholder="例：澄和 花子" data-ph="例：澄和 花子" /></div>
+      <div class="row"><label>姓名</label><input id="authorName" placeholder="例：澄和 花子" data-ph="例：澄和 花子" /></div>
       <div class="row"><label>屋号</label><input id="shopName" placeholder="例：atelier hanako" data-ph="例：atelier hanako" /></div>
       <div class="row"><label>納品番号</label><input id="deliveryNos" placeholder="例：20251121-001, 20251212-001" data-ph="例：20251121-001, 20251212-001" /></div>
       <div class="row"><label>販売期間（開始）</label><input id="periodFrom" type="date" /></div>
@@ -548,7 +548,7 @@ async function generatePDF(){
 
   const infoBody=[
     ["店舗情報","Cléon国分寺店　澄和創藝合同会社"],
-    ["清算書番号",d.docNo||"—"],
+    ["納品書番号",d.docNo||"—"],
     ["作成日",d.docDate?fmtDate(d.docDate):"—"],
     ["作家名",d.author||"—"],
     ["屋号",d.shop||"—"],
@@ -657,12 +657,12 @@ doc.setFontSize(12);
 doc.text(`${formatNumber(d.total)} 円`, sbX + sbW - 4, grandY, { align: "right" });
 
 // ===== RATE NOTE (PDF) =====
-const note = `当店では、海外向け取り扱いのため、作品価格の ${d.rateVal}% を仕入れ基準額（卸価格）として設定しております。`;
+const note = `当店では海外向け取扱いに伴い、納品書記載の販売価格の ${d.rateVal}% を仕入れ基準額（卸価格）として設定しております。`;
 doc.setFont("NotoSansJP","normal");
 doc.setFontSize(8.5);
 doc.setTextColor(120);
 // 放在「合計ボックス」の少し下（不挤，不抢眼）
-const noteY = Math.min(285, grandY + 8);
+const noteY = Math.min(285, grandY + 16);
 doc.text(note, M, noteY, { maxWidth: W - M*2 });
 doc.setTextColor(17);
 
