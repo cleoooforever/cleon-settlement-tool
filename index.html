@@ -579,28 +579,59 @@ async function generatePDF(){
     columnStyles:{0:{cellWidth:cNo,halign:"center"},1:{cellWidth:cName,halign:"left"},2:{cellWidth:cUnit,halign:"right"},3:{cellWidth:cQty,halign:"right"},4:{cellWidth:cAmt,halign:"right"}},
     margin:{left:M,right:M}});
 
-  // 合計ボックス
-  const lY=doc.lastAutoTable.finalY;
-  const isTN=d.mode==="totalnone";
-  const sbW=90, sbX=W-M-sbW, sbY=lY+6;
-  const nR=isTN?2:3; const lH=8; const sbH=lH*nR+10;
-  doc.setDrawColor(204);doc.setLineWidth(0.3);doc.roundedRect(sbX,sbY,sbW,sbH,2,2);
+ // 合計ボックス（線と文字が重ならないように調整）
+const lY = doc.lastAutoTable.finalY;
+const isTN = d.mode === "totalnone";
+const sbW = 90, sbX = W - M - sbW, sbY = lY + 6;
 
-  const sumRows=isTN
-    ?[["入力方式",modeLabel],["お支払い金額",`${formatNumber(d.total)} 円`]]
-    :[["入力方式",modeLabel],[`小計`,`${formatNumber(d.sub)} 円`],[`うち消費税`,`${formatNumber(d.tax)} 円`]];
+// 行の高さと上余白を少しだけ増やして、分割線は「行の中間」に置く
+const rowH = 9;          // ← 少し高く
+const topPad = 8;        // ← 文字を下げる
+const nR = isTN ? 2 : 3;
+const sbH = rowH * nR + 12;
 
-  doc.setFontSize(9.5);
-  sumRows.forEach((r,i)=>{
-    const y=sbY+7+i*lH;
-    if(i>0){doc.setDrawColor(224);doc.line(sbX,y-2,sbX+sbW,y-2);}
-    doc.setFont("NotoSansJP","normal");doc.setTextColor(100);doc.text(r[0],sbX+4,y);
-    doc.setFont("NotoSansJP","bold");doc.setTextColor(17);doc.text(r[1],sbX+sbW-4,y,{align:"right"});
-  });
-  const grandY=sbY+sbH-5;
-  doc.setDrawColor(180);doc.line(sbX,grandY-5,sbX+sbW,grandY-5);
-  doc.setFont("NotoSansJP","bold");doc.setFontSize(10);doc.setTextColor(17);doc.text("合計（販売総額）",sbX+4,grandY);
-  doc.setTextColor(58,110,168);doc.setFontSize(12);doc.text(`${formatNumber(d.total)} 円`,sbX+sbW-4,grandY,{align:"right"});
+doc.setDrawColor(204);
+doc.setLineWidth(0.3);
+doc.roundedRect(sbX, sbY, sbW, sbH, 2, 2);
+
+const sumRows = isTN
+  ? [["入力方式", modeLabel], ["お支払い金額", `${formatNumber(d.total)} 円`]]
+  : [["入力方式", modeLabel], ["小計", `${formatNumber(d.sub)} 円`], ["うち消費税", `${formatNumber(d.tax)} 円`]];
+
+doc.setFontSize(9.5);
+
+sumRows.forEach((r, i) => {
+  const yText = sbY + topPad + i * rowH; // ← 文字のY
+  if (i > 0) {
+    // 分割線は「前行と次行のちょうど中間」に置くと重なりにくい
+    const yLine = sbY + topPad + i * rowH - rowH / 2;
+    doc.setDrawColor(224);
+    doc.setLineWidth(0.2);
+    doc.line(sbX, yLine, sbX + sbW, yLine);
+  }
+  doc.setFont("NotoSansJP", "normal");
+  doc.setTextColor(100);
+  doc.text(r[0], sbX + 4, yText);
+
+  doc.setFont("NotoSansJP", "bold");
+  doc.setTextColor(17);
+  doc.text(r[1], sbX + sbW - 4, yText, { align: "right" });
+});
+
+// 合計（販売総額）
+const grandY = sbY + sbH - 5;
+doc.setDrawColor(180);
+doc.setLineWidth(0.3);
+doc.line(sbX, grandY - 6, sbX + sbW, grandY - 6);
+
+doc.setFont("NotoSansJP", "bold");
+doc.setFontSize(10);
+doc.setTextColor(17);
+doc.text("合計（販売総額）", sbX + 4, grandY);
+
+doc.setTextColor(58, 110, 168);
+doc.setFontSize(12);
+doc.text(`${formatNumber(d.total)} 円`, sbX + sbW - 4, grandY, { align: "right" });
 
   doc.save(makePdfFilename());
 }
