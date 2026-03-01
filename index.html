@@ -359,6 +359,10 @@ const FONT_REG_URL="./NotoSansJP-Regular.ttf";
 const FONT_BOLD_URL="./NotoSansJP-Bold.ttf";
 const LOGO_URL="./cleon-logo.PNG";
 
+// ===== PDF HEADER CONSTANTS (PDFのみで使用) =====
+const PDF_COMPANY_NAME = "澄和創藝合同会社";
+const PDF_COMPANY_ADDR = "〒185-0032 東京都国分寺市日吉町2-34-14 2G号室";
+
 // ===== HELPERS =====
 const yen=n=>(Number.isFinite(n)?n:0).toLocaleString("ja-JP")+" 円";
 const toInt=v=>{const n=Number(String(v??"").replace(/[^\d.-]/g,""));return Number.isFinite(n)?n:0;};
@@ -539,15 +543,28 @@ async function generatePDF(){
   }catch(e){console.warn("Logo embed failed:",e);}
 
   const hX=logoLoaded?54:M;
-  doc.setFont("NotoSansJP","bold");doc.setFontSize(20);doc.text("販売清算確認書",hX,18);
-  doc.setFont("NotoSansJP","normal");doc.setFontSize(11);doc.setTextColor(85);doc.text("澄和創藝合同会社　Cléon国分寺店",hX,24);doc.setTextColor(17);
+
+  // ===== PDF HEADER (ここだけレイアウト変更) =====
+  doc.setFont("NotoSansJP","bold");
+  doc.setFontSize(20);
+  doc.setTextColor(17);
+  doc.text("販売清算確認書",hX,18);
+
+  // タイトル下：左に会社名、右に住所（PDFのみ）
+  doc.setFont("NotoSansJP","normal");
+  doc.setFontSize(10.5);
+  doc.setTextColor(85);
+  doc.text(PDF_COMPANY_NAME, hX, 24);
+  doc.text(PDF_COMPANY_ADDR, W - M, 24, { align: "right" });
+  doc.setTextColor(17);
 
   const d=collectData();
   const modeLabel=d.mode==="taxex"?"税抜（10%別）":d.mode==="totalnone"?"総額（税区分なし）":"税込（10%込）";
   const fmtDate=s=>{if(!s)return"—";const[y,m,dv]=s.split("-");return`${y}年${parseInt(m)}月${parseInt(dv)}日`;};
 
   const infoBody=[
-    ["店舗情報","Cléon国分寺店　澄和創藝合同会社"],
+    // ===== 店舗情報：PDFでは「Cléon国分寺店」のみにする =====
+    ["店舗情報","Cléon国分寺店"],
     ["清算書番号（任意）",d.docNo||"—"],
     ["作成日",d.docDate?fmtDate(d.docDate):"—"],
     ["作家名",d.author||"—"],
@@ -584,7 +601,8 @@ async function generatePDF(){
     const cx=M+col*i+col/2;
     doc.setFont("NotoSansJP","normal");doc.setFontSize(9);doc.setTextColor(100);
     doc.text(item[0],cx,sY+14,{align:"center"});
-    doc.setFont("NotoSansJP","bold");doc.setFontSize(i===3?13:11);doc.setTextColor(i===3?58:17);if(i===3)doc.setTextColor(58,110,168);else doc.setTextColor(17);
+    doc.setFont("NotoSansJP","bold");doc.setFontSize(i===3?13:11);
+    if(i===3)doc.setTextColor(58,110,168);else doc.setTextColor(17);
     doc.text(item[1],cx,sY+23,{align:"center"});
   });
   doc.setTextColor(17);doc.setFont("NotoSansJP","normal");
@@ -602,69 +620,66 @@ async function generatePDF(){
     columnStyles:{0:{cellWidth:cNo,halign:"center"},1:{cellWidth:cName,halign:"left"},2:{cellWidth:cUnit,halign:"right"},3:{cellWidth:cQty,halign:"right"},4:{cellWidth:cAmt,halign:"right"}},
     margin:{left:M,right:M}});
 
- // 合計ボックス（線と文字が重ならないように調整）
-const lY = doc.lastAutoTable.finalY;
-const isTN = d.mode === "totalnone";
-const sbW = 90, sbX = W - M - sbW, sbY = lY + 6;
+  // 合計ボックス（線と文字が重ならないように調整）
+  const lY = doc.lastAutoTable.finalY;
+  const isTN = d.mode === "totalnone";
+  const sbW = 90, sbX = W - M - sbW, sbY = lY + 6;
 
-// 行の高さと上余白を少しだけ増やして、分割線は「行の中間」に置く
-const rowH = 9;          // ← 少し高く
-const topPad = 8;        // ← 文字を下げる
-const nR = isTN ? 2 : 3;
-const sbH = rowH * nR + 12;
+  const rowH = 9;
+  const topPad = 8;
+  const nR = isTN ? 2 : 3;
+  const sbH = rowH * nR + 12;
 
-doc.setDrawColor(204);
-doc.setLineWidth(0.3);
-doc.roundedRect(sbX, sbY, sbW, sbH, 2, 2);
+  doc.setDrawColor(204);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(sbX, sbY, sbW, sbH, 2, 2);
 
-const sumRows = isTN
-  ? [["入力方式", modeLabel], ["お支払い金額", `${formatNumber(d.total)} 円`]]
-  : [["入力方式", modeLabel], ["小計", `${formatNumber(d.sub)} 円`], ["うち消費税", `${formatNumber(d.tax)} 円`]];
+  const sumRows = isTN
+    ? [["入力方式", modeLabel], ["お支払い金額", `${formatNumber(d.total)} 円`]]
+    : [["入力方式", modeLabel], ["小計", `${formatNumber(d.sub)} 円`], ["うち消費税", `${formatNumber(d.tax)} 円`]];
 
-doc.setFontSize(9.5);
+  doc.setFontSize(9.5);
 
-sumRows.forEach((r, i) => {
-  const yText = sbY + topPad + i * rowH; // ← 文字のY
-  if (i > 0) {
-    // 分割線は「前行と次行のちょうど中間」に置くと重なりにくい
-    const yLine = sbY + topPad + i * rowH - rowH / 2;
-    doc.setDrawColor(224);
-    doc.setLineWidth(0.2);
-    doc.line(sbX, yLine, sbX + sbW, yLine);
-  }
-  doc.setFont("NotoSansJP", "normal");
-  doc.setTextColor(100);
-  doc.text(r[0], sbX + 4, yText);
+  sumRows.forEach((r, i) => {
+    const yText = sbY + topPad + i * rowH;
+    if (i > 0) {
+      const yLine = sbY + topPad + i * rowH - rowH / 2;
+      doc.setDrawColor(224);
+      doc.setLineWidth(0.2);
+      doc.line(sbX, yLine, sbX + sbW, yLine);
+    }
+    doc.setFont("NotoSansJP", "normal");
+    doc.setTextColor(100);
+    doc.text(r[0], sbX + 4, yText);
+
+    doc.setFont("NotoSansJP", "bold");
+    doc.setTextColor(17);
+    doc.text(r[1], sbX + sbW - 4, yText, { align: "right" });
+  });
+
+  // 合計（販売総額）
+  const grandY = sbY + sbH - 5;
+  doc.setDrawColor(180);
+  doc.setLineWidth(0.3);
+  doc.line(sbX, grandY - 6, sbX + sbW, grandY - 6);
 
   doc.setFont("NotoSansJP", "bold");
+  doc.setFontSize(10);
   doc.setTextColor(17);
-  doc.text(r[1], sbX + sbW - 4, yText, { align: "right" });
-});
+  doc.text("合計（販売総額）", sbX + 4, grandY);
 
-// 合計（販売総額）
-const grandY = sbY + sbH - 5;
-doc.setDrawColor(180);
-doc.setLineWidth(0.3);
-doc.line(sbX, grandY - 6, sbX + sbW, grandY - 6);
+  doc.setTextColor(58, 110, 168);
+  doc.setFontSize(12);
+  doc.text(`${formatNumber(d.total)} 円`, sbX + sbW - 4, grandY, { align: "right" });
 
-doc.setFont("NotoSansJP", "bold");
-doc.setFontSize(10);
-doc.setTextColor(17);
-doc.text("合計（販売総額）", sbX + 4, grandY);
-
-doc.setTextColor(58, 110, 168);
-doc.setFontSize(12);
-doc.text(`${formatNumber(d.total)} 円`, sbX + sbW - 4, grandY, { align: "right" });
-
-// ===== RATE NOTE (PDF) =====
-const note = `当店では海外向け取扱いに伴い、納品書記載の販売価格の ${d.rateVal}% を仕入れ基準額（卸価格）として設定しております。`;
-doc.setFont("NotoSansJP","normal");
-doc.setFontSize(8.5);
-doc.setTextColor(120);
-// 放在「合計ボックス」の少し下（不挤，不抢眼）
-const noteY = Math.min(285, grandY + 16);
-doc.text(note, M, noteY, { maxWidth: W - M*2 });
-doc.setTextColor(17);
+  // ===== RATE NOTE (PDF) =====
+  const note = `当店では海外向け取扱いに伴い、納品書記載の販売価格の ${d.rateVal}% を仕入れ基準額（卸価格）として設定しております。`;
+  doc.setFont("NotoSansJP","normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(120);
+  const noteY = Math.min(285, grandY + 16);
+  doc.text(note, M, noteY, { maxWidth: W - M*2 });
+  doc.setTextColor(17);
 
   doc.save(makePdfFilename());
 }
