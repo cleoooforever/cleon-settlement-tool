@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+  <title>販売清算確認書 | 澄和創藝合同会社</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f2f4f6; --card:#fff; --text:#1a1e24; --muted:#6b7685;
+      --line:#dce2ea; --accent:#3a6ea8; --accent2:#5b9bd5; --deep:#1a2a3a;
+      --shadow:0 4px 24px rgba(20,40,70,.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{width:100%;max-width:100%;}
+    body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);-webkit-text-size-adjust:100%;min-height:100vh;}
+
+    /* LOGIN */
+    #loginScreen{position:fixed;inset:0;z-index:1000;background:var(--deep);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;transition:opacity .6s ease,transform .6s ease;}
+    #loginScreen.hide{opacity:0;pointer-events:none;transform:translateY(-16px);}
+    .login-deco{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+    .login-deco::before{content:'';position:absolute;top:-40%;left:-20%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(91,155,213,.14) 0%,transparent 70%);}
+    .login-deco::after{content:'';position:absolute;bottom:-30%;right:-10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(58,110,168,.12) 0%,transparent 70%);}
+    .login-box{position:relative;z-index:1;width:100%;max-width:420px;text-align:center;animation:fadeUp .8s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+    .login-logo{height:52px;width:auto;display:block;margin:0 auto 20px;filter:brightness(0) invert(1) opacity(.9);}
+    .login-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;color:#f0ebe3;letter-spacing:2px;margin-bottom:6px;}
+    .login-subtitle{font-size:11px;color:rgba(240,235,227,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:40px;}
+    .login-field{position:relative;margin-bottom:14px;}
+    .login-field input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(91,155,213,.35);border-radius:14px;padding:16px 48px 16px 20px;font-size:15px;color:#f0ebe3;font-family:'Noto Sans JP',sans-serif;letter-spacing:2px;outline:none;transition:border-color .2s,background .2s;}
+    .login-field input::placeholder{color:rgba(240,235,227,.25);letter-spacing:0;}
+    .login-field input:focus{border-color:rgba(91,155,213,.8);background:rgba(255,255,255,.09);}
+    .toggle-pw{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:rgba(240,235,227,.4);font-size:18px;padding:4px;}
+    .login-btn{width:100%;background:linear-gradient(135deg,var(--accent2) 0%,var(--accent) 100%);border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:2px;font-family:'Noto Sans JP',sans-serif;transition:opacity .2s,transform .15s;box-shadow:0 4px 20px rgba(58,110,168,.4);}
+    .login-btn:active{transform:translateY(1px);opacity:.9;}
+    .login-error{margin-top:12px;font-size:13px;color:#e8917a;min-height:20px;}
+    .login-hint{margin-top:36px;font-size:11px;color:rgba(240,235,227,.2);line-height:1.8;}
+
+    /* MAIN */
+    #mainApp{opacity:0;transition:opacity .5s ease .1s;}
+    #mainApp.show{opacity:1;}
+    .wrap{max-width:1140px;margin:0 auto;padding:20px 16px 72px;}
+
+    .topbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--line);}
+    .brand{display:flex;align-items:center;gap:16px;}
+    .logo{height:44px;width:auto;display:block;}
+    .brand-text h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;letter-spacing:1px;color:var(--deep);line-height:1.1;}
+    .brand-text .sub{color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.3px;}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+    button{border:1px solid var(--line);background:#fff;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:'Noto Sans JP',sans-serif;color:var(--text);transition:background .15s,transform .1s;-webkit-tap-highlight-color:transparent;}
+    button:hover:not(:disabled){background:#eef2f8;}
+    button.primary{background:linear-gradient(135deg,var(--accent2) 0%,var(--accent) 100%);border-color:transparent;color:#fff;box-shadow:0 3px 14px rgba(58,110,168,.3);}
+    button.primary:hover:not(:disabled){opacity:.92;}
+    button:disabled{opacity:.5;cursor:not-allowed;}
+    button:active:not(:disabled){transform:translateY(1px);}
+    .btn-mini{padding:9px 14px;border-radius:10px;font-weight:800;}
+    .hint{font-size:12px;color:var(--muted);}
+
+
+
+
+    .grid{display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:16px;align-items:start;}
+    @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);}
+    .sec-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;}
+    .sec-title h2{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--deep);letter-spacing:.5px;}
+    .small{font-size:12px;color:var(--muted);}
+    .row{display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center;margin:9px 0;}
+    .row label{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.3px;}
+    input,textarea,select{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:15px;background:#fdfcfa;color:var(--text);font-family:'Noto Sans JP',sans-serif;transition:border-color .15s,box-shadow .15s;outline:none;}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(91,155,213,.13);}
+    textarea{min-height:60px;resize:vertical;}
+    input[type="date"]{-webkit-appearance:none;appearance:none;}
+    .dest-box{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fdfcfa;}
+    .dest-name{font-weight:900;font-size:14px;color:var(--deep);}
+    .dest-addr{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.6;}
+
+    /* 清算サマリーカード */
+    .seisan-summary{margin-top:14px;border:1px solid var(--accent2);border-radius:16px;padding:16px;background:linear-gradient(135deg,#eef4fb 0%,#e8f0f9 100%);}
+    .seisan-summary-title{font-size:12px;font-weight:900;color:var(--muted);letter-spacing:.5px;margin-bottom:10px;text-transform:uppercase;}
+    .seisan-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+    .seisan-row:last-child{border-bottom:none;}
+    .seisan-row .k{color:var(--muted);font-size:12px;font-weight:700;}
+    .seisan-row .v{font-weight:900;font-size:14px;color:var(--deep);}
+    .seisan-row.highlight .k{color:var(--deep);font-size:13px;}
+    .seisan-row.highlight .v{font-size:16px;color:var(--accent);}
+
+    .pill{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px dashed var(--accent2);border-radius:14px;background:linear-gradient(135deg,#eef4fb 0%,#e8f0f9 100%);margin-top:12px;}
+    .footer-note{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.8;}
+
+    .table-wrap{border:1px solid var(--line);border-radius:14px;background:#fff;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    table{width:100%;border-collapse:collapse;background:#fff;table-layout:fixed;}
+    col.no{width:52px;} col.unit{width:115px;} col.qty{width:86px;} col.amount{width:126px;} col.del{width:62px;} col.name{width:auto;}
+    thead th{background:linear-gradient(to bottom,#eef3fa,#e4edf7);color:var(--deep);font-weight:900;font-size:12px;padding:11px 8px;border-bottom:1px solid var(--line);white-space:nowrap;letter-spacing:.3px;}
+    tbody td{border-bottom:1px solid var(--line);padding:8px;vertical-align:middle;font-size:14px;overflow:hidden;}
+    tbody tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:#f0f5fc;}
+    .num{text-align:right;font-variant-numeric:tabular-nums;}
+    .center{text-align:center;}
+    td input{width:100%;min-width:0;padding:7px 10px;font-size:14px;border-radius:8px;}
+    td.unitcell input,td.qtycell input{text-align:right;}
+    .table-actions{margin-top:10px;display:flex;justify-content:center;}
+    .table-actions button{padding:11px 20px;border-radius:12px;font-weight:900;}
+
+    .sum{margin-top:14px;display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start;}
+    @media(max-width:900px){.sum{grid-template-columns:1fr;}}
+    .sum-box{border:1px solid var(--line);border-radius:16px;padding:14px;background:linear-gradient(135deg,#eef4fb 0%,#fff 100%);box-shadow:var(--shadow);}
+    .sum-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+    .sum-row:last-child{border-bottom:none;}
+    .sum-row .k{color:var(--muted);font-size:13px;font-weight:700;}
+    .sum-row .v{font-weight:900;font-size:14px;color:var(--deep);}
+    .sum-row.grand .k{color:var(--deep);font-size:14px;font-weight:900;}
+    .sum-row.grand .v{font-size:17px;color:var(--accent);}
+    .mode-badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;background:#dbeafe;color:#1d4ed8;letter-spacing:.3px;}
+    .mode-badge.taxex{background:#fff3e0;color:#c07000;}
+    .mode-badge.totalnone{background:#f0ebff;color:#6b3fa0;}
+
+    /* 返戻率入力 */
+    .rate-input-wrap{display:flex;align-items:center;gap:8px;}
+    .rate-input-wrap input{width:80px;text-align:right;}
+    .rate-input-wrap span{color:var(--muted);font-weight:700;font-size:15px;}
+
+    /* Mobile */
+    body.is-mobile .row{grid-template-columns:1fr;gap:4px;margin:10px 0;}
+    body.is-mobile .row label{font-size:12px;font-weight:700;}
+    body.is-mobile .table-wrap{overflow:visible;border:0;background:transparent;}
+    body.is-mobile table{min-width:0;background:transparent;}
+    body.is-mobile table,body.is-mobile thead,body.is-mobile tbody,body.is-mobile tr,body.is-mobile td{display:block;width:100%;}
+    body.is-mobile thead{display:none;}
+    body.is-mobile tbody tr{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0;box-shadow:var(--shadow);}
+    body.is-mobile tbody td{border-bottom:0;padding:6px 0;overflow:visible;}
+    body.is-mobile tbody td:nth-child(1){padding-top:0;font-weight:900;color:var(--deep);display:flex;justify-content:center;}
+    body.is-mobile tbody td:nth-child(2)::before{content:"品名 / 作品名";display:block;color:var(--muted);font-weight:800;font-size:12px;margin-bottom:6px;}
+    body.is-mobile tbody td:nth-child(3),body.is-mobile tbody td:nth-child(4),body.is-mobile tbody td:nth-child(5),body.is-mobile tbody td:nth-child(6){display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    body.is-mobile tbody td:nth-child(3)::before{content:"単価";color:var(--muted);font-weight:800;font-size:12px;}
+    body.is-mobile tbody td:nth-child(4)::before{content:"数量";color:var(--muted);font-weight:800;font-size:12px;}
+    body.is-mobile tbody td:nth-child(5)::before{content:"金額";color:var(--muted);font-weight:800;font-size:12px;}
+    body.is-mobile tbody td:nth-child(6)::before{content:"削除";color:var(--muted);font-weight:800;font-size:12px;}
+    body.is-mobile tbody td:nth-child(3) input,body.is-mobile tbody td:nth-child(4) input{width:60%;text-align:right;}
+    body.is-mobile tbody td:nth-child(5){padding-top:10px;border-top:1px dashed var(--line);margin-top:6px;}
+    body.is-mobile tbody td:nth-child(6) button{padding:10px 14px;border-radius:12px;}
+    body.is-mobile input[type="date"]{width:100%;max-width:100%;display:block;}
+    body.is-mobile .rate-input-wrap input{width:70px;}
+
+    /* Print */
+    @page{size:A4;margin:12mm;}
+    @media print{
+      body{background:#fff;}
+      #loginScreen{display:none !important;}
+      .wrap{max-width:none;padding:0;}
+      .actions,.pill,.table-actions,.footer-note,.send-banner{display:none !important;}
+      .card{box-shadow:none;border:0;border-radius:0;padding:0;}
+      .grid{display:block !important;}
+      .topbar{margin-bottom:14px;border-bottom:1px solid #ccc;padding-bottom:10px;}
+      .table-wrap{border:1px solid #aaa;border-radius:0;overflow:visible !important;background:#fff !important;}
+      table{display:table !important;width:100% !important;border-collapse:collapse !important;table-layout:fixed !important;}
+      col.no{width:38px !important;} col.unit{width:100px !important;} col.qty{width:65px !important;} col.amount{width:115px !important;} col.del{width:0 !important;display:none !important;}
+      thead{display:table-header-group !important;} tbody{display:table-row-group !important;}
+      tr{display:table-row !important;page-break-inside:avoid !important;}
+      th,td{display:table-cell !important;} td::before{content:none !important;}
+      tbody tr{box-shadow:none !important;border:0 !important;border-radius:0 !important;padding:0 !important;margin:0 !important;background:#fff !important;}
+      tbody tr:hover td{background:#fff !important;}
+      thead th{background:#efefef !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      tbody td{border:1px solid #aaa !important;padding:6px 8px !important;overflow:hidden !important;vertical-align:middle !important;font-size:12px !important;}
+      th:last-child,td:last-child{display:none !important;}
+      input,textarea,select{border:0 !important;padding:0 !important;font-size:12px !important;background:transparent !important;-webkit-appearance:none;appearance:none;box-shadow:none !important;}
+      .row{grid-template-columns:130px 1fr !important;gap:5px !important;align-items:center !important;margin:5px 0 !important;}
+      .sum{grid-template-columns:1fr !important;}
+      .sum-box{width:260px;margin-left:auto;background:#fff !important;box-shadow:none !important;}
+      .seisan-summary{background:#fff !important;border:1px solid #ccc !important;}
+      .mode-badge{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-deco"></div>
+  <div class="login-box">
+    <img src="cleon-logo.PNG" alt="Cléon arts and trade" class="login-logo" onerror="this.style.display='none'" />
+    <div class="login-title">Cléon arts &amp; trade</div>
+    <div class="login-subtitle">Settlement Confirmation System</div>
+    <div class="login-field">
+      <input type="password" id="pwInput" placeholder="パスワードを入力してください" autocomplete="current-password" />
+      <button class="toggle-pw" type="button" id="togglePw" aria-label="show password">👁</button>
+    </div>
+    <button class="login-btn" id="loginBtn" type="button">ログイン</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-hint">このページはCléon arts &amp; trade のスタッフ専用ツールです。<br>お心当たりのない方は、そっとページをお閉じください。</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="cleon-logo.PNG" alt="Cléon" class="logo" onerror="this.style.display='none'" />
+      <div class="brand-text">
+        <h1>販売清算確認書</h1>
+        <div class="sub">澄和創藝合同会社　|　Sales Settlement Confirmation</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn-mini" id="clearBtn">リセット</button>
+      <button type="button" class="primary btn-mini" id="pdfBtn">📄 PDFをダウンロード</button>
+      <button type="button" class="btn-mini" id="printBtn">🖨 印刷</button>
+      <span class="hint" id="pdfHint"></span>
+    </div>
+  </div>
+
+
+
+
+  <div class="grid">
+    <!-- 左カラム：基本情報 -->
+    <div class="card">
+      <div class="sec-title"><h2>基本情報</h2><div class="small">必要事項をご入力ください</div></div>
+
+      <div class="row">
+        <label>店舗情報</label>
+        <div class="dest-box">
+          <div class="dest-name">Cléon国分寺店</div>
+          <div class="dest-addr">澄和創藝合同会社</div>
+        </div>
+      </div>
+      <div class="row"><label>清算書番号（任意）</label><input id="docNo" placeholder="例：2026-001" data-ph="例：2026-001" /></div>
+      <div class="row"><label>作成日</label><input id="docDate" type="date" /></div>
+      <div class="row"><label>作家名</label><input id="authorName" placeholder="例：澄和 花子" data-ph="例：澄和 花子" /></div>
+      <div class="row"><label>屋号</label><input id="shopName" placeholder="例：atelier hanako" data-ph="例：atelier hanako" /></div>
+      <div class="row"><label>納品番号</label><input id="deliveryNos" placeholder="例：20251121-001, 20251212-001" data-ph="例：20251121-001, 20251212-001" /></div>
+      <div class="row"><label>販売期間（開始）</label><input id="periodFrom" type="date" /></div>
+      <div class="row"><label>販売期間（終了）</label><input id="periodTo" type="date" /></div>
+      <div class="row"><label>振込予定日</label><input id="transferDate" type="date" /></div>
+      <div class="row"><label>備考</label><textarea id="memo" placeholder="（任意）特記事項があればご記入ください" data-ph="（任意）特記事項があればご記入ください"></textarea></div>
+
+      <div class="pill">
+        <span style="font-size:13px;font-weight:700;color:var(--muted);">入力方式：</span>
+        <select id="mode">
+          <option value="taxin" selected>税込（10%込）</option>
+          <option value="taxex">税抜（10%別）</option>
+          <option value="totalnone">総額（税区分なし）</option>
+        </select>
+      </div>
+
+      <!-- 清算サマリー -->
+      <div class="seisan-summary">
+        <div class="seisan-summary-title">清算内容</div>
+        <div class="seisan-row">
+          <div class="k">販売点数</div>
+          <div class="v">合計 <span id="totalQty">0</span> 点</div>
+        </div>
+        <div class="seisan-row">
+          <div class="k">販売総額</div>
+          <div class="v" id="salesTotal">0 円</div>
+        </div>
+        <div class="seisan-row" style="align-items:center;">
+          <div class="k">お戻し率</div>
+          <div class="v">
+            <div class="rate-input-wrap">
+              <input type="number" id="returnRate" value="88" min="0" max="100" step="1" />
+              <span>%</span>
+            </div>
+          </div>
+        </div>
+        <div class="seisan-row highlight">
+          <div class="k">お戻し金額（振込金額）</div>
+          <div class="v" id="returnAmt">0 円</div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        ※「税込」「税抜」のどちらか分かる場合は該当する方をお選びください。<br/>
+        ※お戻し金額は「販売総額 × お戻し率」で自動計算されます。<br/>
+        ※当フォームはCléon専用の内部ツールです。
+      </div>
+    </div>
+
+    <!-- 右カラム：明細 -->
+    <div class="card">
+      <div class="sec-title"><h2>販売明細</h2><div class="small">単価 × 数量 → 金額（自動計算）</div></div>
+      <div class="table-wrap">
+        <table id="itemsTable">
+          <colgroup><col class="no"><col class="name"><col class="unit"><col class="qty"><col class="amount"><col class="del"></colgroup>
+          <thead><tr><th class="center">No</th><th>品名 / 作品名</th><th class="num">単価</th><th class="num">数量</th><th class="num">金額</th><th class="center">削除</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="table-actions"><button type="button" class="btn-mini" id="addRowBtn">＋ 追加</button></div>
+      <div class="sum">
+        <div class="footer-note">
+          ※ 金額は自動計算です。「PDFをダウンロード」でPDFが作成できます。<br/>
+          ※ 税込入力時：合計は入力金額の合算、内訳として小計と内消費税を算出します。
+        </div>
+        <div class="sum-box">
+          <div class="sum-row"><div class="k">入力方式</div><div class="v"><span class="mode-badge" id="modeBadge">税込（10%込）</span></div></div>
+          <div class="sum-row"><div class="k">小計</div><div class="v" id="subTotal">0 円</div></div>
+          <div class="sum-row" id="taxRow"><div class="k">うち消費税</div><div class="v" id="tax">0 円</div></div>
+          <div class="sum-row grand"><div class="k">合計（販売総額）</div><div class="v" id="grandTotal">0 円</div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /grid -->
+
+</div><!-- /wrap -->
+</div><!-- /mainApp -->
+
+<script>
+// ===== LOGIN =====
+const PASS = "cleon2026stool1";
+function tryLogin(){
+  if(document.getElementById("pwInput").value===PASS){
+    document.getElementById("loginScreen").classList.add("hide");
+    document.getElementById("mainApp").classList.add("show");
+    setTimeout(()=>{document.getElementById("loginScreen").style.display="none";},700);
+  } else {
+    const err=document.getElementById("loginError");
+    err.textContent="パスワードが正しくありません。";
+    document.getElementById("pwInput").value="";
+    document.getElementById("pwInput").focus();
+    setTimeout(()=>{err.textContent="";},3000);
+  }
+}
+document.getElementById("loginBtn").addEventListener("click",tryLogin);
+document.getElementById("pwInput").addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin();});
+document.getElementById("togglePw").addEventListener("click",()=>{
+  const i=document.getElementById("pwInput"); i.type=i.type==="password"?"text":"password";
+});
+
+
+
+
+// ===== FONT / LOGO URLS =====
+const FONT_REG_URL="./NotoSansJP-Regular.ttf";
+const FONT_BOLD_URL="./NotoSansJP-Bold.ttf";
+const LOGO_URL="./cleon-logo.PNG";
+
+// ===== HELPERS =====
+const yen=n=>(Number.isFinite(n)?n:0).toLocaleString("ja-JP")+" 円";
+const toInt=v=>{const n=Number(String(v??"").replace(/[^\d.-]/g,""));return Number.isFinite(n)?n:0;};
+const roundY=n=>Math.round(n);
+const formatNumber=n=>Number(n||0).toLocaleString("ja-JP");
+const _phBackup=new Map();
+function clearPH(){document.querySelectorAll("[data-ph],input.name,input.unit,input.qty").forEach(el=>{_phBackup.set(el,el.getAttribute("placeholder")||"");el.setAttribute("placeholder","");});}
+function restorePH(){_phBackup.forEach((v,el)=>{try{el.setAttribute("placeholder",v);}catch(e){}});_phBackup.clear();}
+function checkMobile(){if(window.innerWidth<=620)document.body.classList.add("is-mobile");else document.body.classList.remove("is-mobile");}
+checkMobile(); window.addEventListener("resize",checkMobile);
+
+// ===== TABLE =====
+const tbody=document.getElementById("tbody");
+const modeSel=document.getElementById("mode");
+
+function makeRow(i){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td class="center no">${i}</td><td class="namecell"><input class="name" placeholder="例：作品名" /></td><td class="num unitcell"><input class="unit" inputmode="numeric" placeholder="0" /></td><td class="num qtycell"><input class="qty" inputmode="numeric" placeholder="1" value="1" /></td><td class="num amount">0 円</td><td class="center"><button type="button" class="btn-mini del" style="color:#c0392b;border-color:#fad7d7;background:#fff9f9;">×</button></td>`;
+  tr.querySelector(".del").addEventListener("click",()=>{tr.remove();renumber();recalc();});
+  tr.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",recalc));
+  return tr;
+}
+function renumber(){[...tbody.querySelectorAll("tr")].forEach((tr,i)=>{tr.querySelector(".no").textContent=i+1;});}
+function addRows(n){const start=tbody.querySelectorAll("tr").length;for(let k=0;k<n;k++)tbody.appendChild(makeRow(start+k+1));recalc();}
+
+function recalc(){
+  let sumAmt=0, sumQty=0;
+  [...tbody.querySelectorAll("tr")].forEach(tr=>{
+    const unit=toInt(tr.querySelector(".unit").value);
+    const qty=Math.max(0,toInt(tr.querySelector(".qty").value||0));
+    const amt=roundY(unit*qty);
+    tr.querySelector(".amount").textContent=yen(amt);
+    sumAmt+=amt; sumQty+=qty;
+  });
+
+  const rate=0.10; const mode=modeSel.value;
+  const badge=document.getElementById("modeBadge");
+  if(mode==="taxex"){badge.textContent="税抜（10%別）";badge.className="mode-badge taxex";}
+  else if(mode==="totalnone"){badge.textContent="総額（税区分なし）";badge.className="mode-badge totalnone";}
+  else{badge.textContent="税込（10%込）";badge.className="mode-badge";}
+
+  let subV=0, taxV=0, totalV=0;
+  const taxRow=document.getElementById("taxRow");
+  if(mode==="totalnone"){
+    taxRow.style.display="none";
+    totalV=roundY(sumAmt); subV=totalV;
+  } else {
+    taxRow.style.display="";
+    if(mode==="taxex"){subV=roundY(sumAmt);taxV=roundY(subV*rate);totalV=subV+taxV;}
+    else{totalV=roundY(sumAmt);subV=roundY(totalV/(1+rate));taxV=totalV-subV;}
+  }
+
+  document.getElementById("subTotal").textContent=yen(subV);
+  document.getElementById("tax").textContent=yen(taxV);
+  document.getElementById("grandTotal").textContent=yen(totalV);
+
+  // 清算サマリー更新
+  document.getElementById("totalQty").textContent=sumQty;
+  document.getElementById("salesTotal").textContent=yen(totalV);
+  const rateVal=Math.max(0,Math.min(100,parseFloat(document.getElementById("returnRate").value)||0));
+  const returnAmt=roundY(totalV*(rateVal/100));
+  document.getElementById("returnAmt").textContent=yen(returnAmt);
+}
+
+document.getElementById("addRowBtn").addEventListener("click",()=>addRows(1));
+modeSel.addEventListener("change",recalc);
+document.getElementById("returnRate").addEventListener("input",recalc);
+
+// ===== RESET =====
+document.getElementById("clearBtn").addEventListener("click",()=>{
+  if(!confirm("入力内容をリセットします。よろしいですか？"))return;
+  ["docNo","authorName","shopName","deliveryNos","memo"].forEach(id=>document.getElementById(id).value="");
+  const d=new Date();
+  const today=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  document.getElementById("docDate").value=today;
+  document.getElementById("periodFrom").value="";
+  document.getElementById("periodTo").value="";
+  document.getElementById("transferDate").value="";
+  document.getElementById("returnRate").value="88";
+  modeSel.value="taxin"; tbody.innerHTML=""; addRows(6);
+});
+
+// ===== PRINT =====
+document.getElementById("printBtn").addEventListener("click",()=>{clearPH();window.print();setTimeout(restorePH,1200);});
+
+// ===== PDF =====
+function makePdfFilename(){
+  const no=(document.getElementById("docNo").value||"").trim();
+  const au=(document.getElementById("authorName").value||"").trim();
+  const dt=(document.getElementById("docDate").value||"").trim();
+  const base=no?`販売清算確認書_${no}`:"販売清算確認書";
+  const tail=[au,dt].filter(Boolean).join("_");
+  return(tail?`${base}_${tail}`:base)+".pdf";
+}
+
+async function fetchAsBase64(url){
+  const res=await fetch(url,{cache:"force-cache"});
+  if(!res.ok)throw new Error("fetch failed: "+url+" ("+res.status+")");
+  const buf=await res.arrayBuffer();
+  let binary=""; const bytes=new Uint8Array(buf); const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk));
+  return btoa(binary);
+}
+
+function collectData(){
+  const mode=modeSel.value;
+  const rows=[...tbody.querySelectorAll("tr")].map(tr=>({
+    no:tr.querySelector(".no").textContent,
+    name:(tr.querySelector(".name").value||"").trim(),
+    unit:toInt(tr.querySelector(".unit").value),
+    qty:Math.max(0,toInt(tr.querySelector(".qty").value||0)),
+  })).map(r=>({...r,amt:roundY(r.unit*r.qty)}));
+
+  const sumAmt=roundY(rows.reduce((a,r)=>a+r.amt,0));
+  const sumQty=rows.reduce((a,r)=>a+r.qty,0);
+  const rate=0.10;
+  let sub=0,tax=null,total=0;
+  if(mode==="totalnone"){total=roundY(sumAmt);sub=total;tax=null;}
+  else if(mode==="taxex"){sub=roundY(sumAmt);tax=roundY(sub*rate);total=sub+tax;}
+  else{total=roundY(sumAmt);sub=roundY(total/(1+rate));tax=total-sub;}
+
+  const rateVal=Math.max(0,Math.min(100,parseFloat(document.getElementById("returnRate").value)||0));
+  const returnAmt=roundY(total*(rateVal/100));
+
+  const fmtDate=s=>{if(!s)return"—";const[y,m,d]=s.split("-");return`${y}年${parseInt(m)}月${parseInt(d)}日`;};
+  const pFrom=document.getElementById("periodFrom").value;
+  const pTo=document.getElementById("periodTo").value;
+  const periodStr=(pFrom||pTo)?(fmtDate(pFrom)+(pTo?" 〜 "+fmtDate(pTo):"")):"—";
+
+  return{
+    docNo:(document.getElementById("docNo").value||"").trim(),
+    docDate:(document.getElementById("docDate").value||"").trim(),
+    author:(document.getElementById("authorName").value||"").trim(),
+    shop:(document.getElementById("shopName").value||"").trim(),
+    deliveryNos:(document.getElementById("deliveryNos").value||"").trim(),
+    periodStr,
+    transferDate:fmtDate(document.getElementById("transferDate").value),
+    memo:(document.getElementById("memo").value||"").trim(),
+    mode, rows, sumQty, sub, tax, total, rateVal, returnAmt,
+  };
+}
+
+async function generatePDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"a4"});
+  try{const r=await fetchAsBase64(FONT_REG_URL);doc.addFileToVFS("NotoSansJP-Regular.ttf",r);doc.addFont("NotoSansJP-Regular.ttf","NotoSansJP","normal","Identity-H");}
+  catch(e){throw new Error("Regular font load failed: "+e.message);}
+  try{const b=await fetchAsBase64(FONT_BOLD_URL);doc.addFileToVFS("NotoSansJP-Bold.ttf",b);doc.addFont("NotoSansJP-Bold.ttf","NotoSansJP","bold","Identity-H");}
+  catch(e){console.warn("Bold font not available:",e);}
+  doc.setFont("NotoSansJP","normal");
+
+  const M=12, W=210;
+  let logoLoaded=false;
+  try{
+    const lb=await fetchAsBase64(LOGO_URL);
+    const fmt="PNG";
+    await new Promise(resolve=>{
+      const img=new Image();
+      img.onload=()=>{const tH=14;const tW=(img.naturalWidth/img.naturalHeight)*tH;doc.addImage("data:image/png;base64,"+lb,fmt,M,10,tW,tH);logoLoaded=true;resolve();};
+      img.onerror=()=>resolve();
+      img.src="data:image/png;base64,"+lb;
+    });
+  }catch(e){console.warn("Logo embed failed:",e);}
+
+  const hX=logoLoaded?54:M;
+  doc.setFont("NotoSansJP","bold");doc.setFontSize(20);doc.text("販売清算確認書",hX,18);
+  doc.setFont("NotoSansJP","normal");doc.setFontSize(11);doc.setTextColor(85);doc.text("澄和創藝合同会社　Cléon国分寺店",hX,24);doc.setTextColor(17);
+
+  const d=collectData();
+  const modeLabel=d.mode==="taxex"?"税抜（10%別）":d.mode==="totalnone"?"総額（税区分なし）":"税込（10%込）";
+  const fmtDate=s=>{if(!s)return"—";const[y,m,dv]=s.split("-");return`${y}年${parseInt(m)}月${parseInt(dv)}日`;};
+
+  const infoBody=[
+    ["店舗情報","Cléon国分寺店　澄和創藝合同会社"],
+    ["清算書番号",d.docNo||"—"],
+    ["作成日",d.docDate?fmtDate(d.docDate):"—"],
+    ["作家名",d.author||"—"],
+    ["屋号",d.shop||"—"],
+    ["納品番号",d.deliveryNos||"—"],
+    ["販売期間",d.periodStr],
+    ["振込予定日",d.transferDate],
+  ];
+  if(d.memo)infoBody.push(["備考",d.memo]);
+
+  doc.autoTable({startY:30,theme:"grid",head:[],body:infoBody,
+    styles:{font:"NotoSansJP",fontStyle:"normal",fontSize:10,cellPadding:2.2,lineColor:170,lineWidth:0.2,valign:"top"},
+    columnStyles:{0:{cellWidth:36,textColor:[85,85,85],fontStyle:"bold"},1:{cellWidth:W-M*2-36}},
+    margin:{left:M,right:M}});
+
+  // 清算サマリーボックス
+  const sY=doc.lastAutoTable.finalY+5;
+  const bW=W-M*2, bH=30;
+  doc.setDrawColor(91,155,213);doc.setLineWidth(0.4);doc.roundedRect(M,sY,bW,bH,2,2);
+  doc.setFillColor(238,244,251);doc.roundedRect(M,sY,bW,bH,2,2,"F");
+  doc.setDrawColor(91,155,213);doc.roundedRect(M,sY,bW,bH,2,2,"S");
+
+  doc.setFont("NotoSansJP","bold");doc.setFontSize(9);doc.setTextColor(120);
+  doc.text("清算内容",M+4,sY+6);
+  doc.setTextColor(17);doc.setFontSize(10);
+  const col=bW/4;
+  const items=[
+    ["販売点数",`合計 ${d.sumQty} 点`],
+    ["販売総額",`${formatNumber(d.total)} 円`],
+    [`お戻し率`,`${d.rateVal}%`],
+    ["お戻し金額",`${formatNumber(d.returnAmt)} 円`],
+  ];
+  items.forEach((item,i)=>{
+    const cx=M+col*i+col/2;
+    doc.setFont("NotoSansJP","normal");doc.setFontSize(9);doc.setTextColor(100);
+    doc.text(item[0],cx,sY+14,{align:"center"});
+    doc.setFont("NotoSansJP","bold");doc.setFontSize(i===3?13:11);doc.setTextColor(i===3?58:17);if(i===3)doc.setTextColor(58,110,168);else doc.setTextColor(17);
+    doc.text(item[1],cx,sY+23,{align:"center"});
+  });
+  doc.setTextColor(17);doc.setFont("NotoSansJP","normal");
+
+  // 明細テーブル
+  const tY=sY+bH+6;
+  const ib=d.rows.map(r=>[String(r.no),r.name||"",formatNumber(r.unit),formatNumber(r.qty),formatNumber(r.amt)+" 円"]);
+  while(ib.length<6)ib.push([String(ib.length+1),"","","","0 円"]);
+
+  const cNo=12,cUnit=32,cQty=20,cAmt=36,cName=(W-M*2)-(cNo+cUnit+cQty+cAmt);
+  doc.autoTable({startY:tY,theme:"grid",
+    head:[["No","品名 / 作品名","単価","数量","金額"]],body:ib,
+    styles:{font:"NotoSansJP",fontStyle:"normal",fontSize:10,cellPadding:2.0,lineColor:170,lineWidth:0.2,valign:"middle"},
+    headStyles:{fillColor:[239,239,239],textColor:17,fontStyle:"bold"},
+    columnStyles:{0:{cellWidth:cNo,halign:"center"},1:{cellWidth:cName,halign:"left"},2:{cellWidth:cUnit,halign:"right"},3:{cellWidth:cQty,halign:"right"},4:{cellWidth:cAmt,halign:"right"}},
+    margin:{left:M,right:M}});
+
+  // 合計ボックス
+  const lY=doc.lastAutoTable.finalY;
+  const isTN=d.mode==="totalnone";
+  const sbW=90, sbX=W-M-sbW, sbY=lY+6;
+  const nR=isTN?2:3; const lH=8; const sbH=lH*nR+10;
+  doc.setDrawColor(204);doc.setLineWidth(0.3);doc.roundedRect(sbX,sbY,sbW,sbH,2,2);
+
+  const sumRows=isTN
+    ?[["入力方式",modeLabel],["お支払い金額",`${formatNumber(d.total)} 円`]]
+    :[["入力方式",modeLabel],[`小計`,`${formatNumber(d.sub)} 円`],[`うち消費税`,`${formatNumber(d.tax)} 円`]];
+
+  doc.setFontSize(9.5);
+  sumRows.forEach((r,i)=>{
+    const y=sbY+7+i*lH;
+    if(i>0){doc.setDrawColor(224);doc.line(sbX,y-2,sbX+sbW,y-2);}
+    doc.setFont("NotoSansJP","normal");doc.setTextColor(100);doc.text(r[0],sbX+4,y);
+    doc.setFont("NotoSansJP","bold");doc.setTextColor(17);doc.text(r[1],sbX+sbW-4,y,{align:"right"});
+  });
+  const grandY=sbY+sbH-5;
+  doc.setDrawColor(180);doc.line(sbX,grandY-5,sbX+sbW,grandY-5);
+  doc.setFont("NotoSansJP","bold");doc.setFontSize(10);doc.setTextColor(17);doc.text("合計（販売総額）",sbX+4,grandY);
+  doc.setTextColor(58,110,168);doc.setFontSize(12);doc.text(`${formatNumber(d.total)} 円`,sbX+sbW-4,grandY,{align:"right"});
+
+  doc.save(makePdfFilename());
+}
+
+async function handlePDF(){
+  const btn=document.getElementById("pdfBtn"),hint=document.getElementById("pdfHint");
+  btn.disabled=true;hint.textContent="PDFを作成中…";clearPH();
+  try{await generatePDF();hint.textContent="";}
+  catch(e){console.error(e);alert("PDF作成に失敗しました。\n\nエラー: "+e.message);}
+  finally{restorePH();btn.disabled=false;setTimeout(()=>{hint.textContent="";},4000);}
+}
+document.getElementById("pdfBtn").addEventListener("click",handlePDF);
+
+// ===== INIT =====
+const d=new Date();
+document.getElementById("docDate").value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+addRows(6);
+</script>
+</body>
+</html>
