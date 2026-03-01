@@ -106,13 +106,14 @@
 
     .sum{margin-top:14px;display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start;}
     @media(max-width:900px){.sum{grid-template-columns:1fr;}}
-    .sum-box{border:1px solid var(--line);border-radius:16px;padding:14px;background:linear-gradient(135deg,#eef4fb 0%,#fff 100%);box-shadow:var(--shadow);}
-    .sum-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+    .sum-box{border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
+    .sum-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;background:#fff;}
     .sum-row:last-child{border-bottom:none;}
-    .sum-row .k{color:var(--muted);font-size:13px;font-weight:700;}
-    .sum-row .v{font-weight:900;font-size:14px;color:var(--deep);}
-    .sum-row.grand .k{color:var(--deep);font-size:14px;font-weight:900;}
-    .sum-row.grand .v{font-size:17px;color:var(--accent);}
+    .sum-row .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.3px;}
+    .sum-row .v{font-weight:800;font-size:14px;color:var(--deep);}
+    .sum-row.grand{background:linear-gradient(135deg,var(--deep) 0%,#2a4a6a 100%);padding:14px 16px;}
+    .sum-row.grand .k{color:rgba(255,255,255,.7);font-size:13px;font-weight:700;}
+    .sum-row.grand .v{font-size:18px;color:#fff;font-weight:900;letter-spacing:.5px;}
     .mode-badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;background:#dbeafe;color:#1d4ed8;letter-spacing:.3px;}
     .mode-badge.taxex{background:#fff3e0;color:#c07000;}
     .mode-badge.totalnone{background:#f0ebff;color:#6b3fa0;}
@@ -369,11 +370,15 @@ function addRows(n){const start=tbody.querySelectorAll("tr").length;for(let k=0;
 function recalc(){
   let sumAmt=0, sumQty=0;
   [...tbody.querySelectorAll("tr")].forEach(tr=>{
-    const unit=toInt(tr.querySelector(".unit").value);
+    const unitRaw=tr.querySelector(".unit").value.trim();
+    const nameRaw=tr.querySelector(".name").value.trim();
+    const unit=toInt(unitRaw);
     const qty=Math.max(0,toInt(tr.querySelector(".qty").value||0));
     const amt=roundY(unit*qty);
     tr.querySelector(".amount").textContent=yen(amt);
-    sumAmt+=amt; sumQty+=qty;
+    sumAmt+=amt;
+    // 品名または単価が入力されている行のみ点数としてカウント
+    if(nameRaw||unitRaw) sumQty+=qty;
   });
 
   const rate=0.10; const mode=modeSel.value;
@@ -450,12 +455,13 @@ function collectData(){
   const rows=[...tbody.querySelectorAll("tr")].map(tr=>({
     no:tr.querySelector(".no").textContent,
     name:(tr.querySelector(".name").value||"").trim(),
+    unitRaw:(tr.querySelector(".unit").value||"").trim(),
     unit:toInt(tr.querySelector(".unit").value),
     qty:Math.max(0,toInt(tr.querySelector(".qty").value||0)),
   })).map(r=>({...r,amt:roundY(r.unit*r.qty)}));
 
   const sumAmt=roundY(rows.reduce((a,r)=>a+r.amt,0));
-  const sumQty=rows.reduce((a,r)=>a+r.qty,0);
+  const sumQty=rows.reduce((a,r)=>a+(r.name||r.unitRaw?r.qty:0),0);
   const rate=0.10;
   let sub=0,tax=null,total=0;
   if(mode==="totalnone"){total=roundY(sumAmt);sub=total;tax=null;}
