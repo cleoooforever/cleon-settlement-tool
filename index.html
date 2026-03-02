@@ -467,7 +467,7 @@ function makePdfFilename(){
   const no=(document.getElementById("docNo").value||"").trim();
   const au=(document.getElementById("authorName").value||"").trim();
   const dt=(document.getElementById("docDate").value||"").trim();
-  const base=no?`販売清算確認書_${no}`:"販売清算確認書";
+  const base=no?`納品清算確認書_${no}`:"納品清算確認書";
   const tail=[au,dt].filter(Boolean).join("_");
   return(tail?`${base}_${tail}`:base)+".pdf";
 }
@@ -548,7 +548,7 @@ async function generatePDF(){
   doc.setFont("NotoSansJP","bold");
   doc.setFontSize(20);
   doc.setTextColor(17);
-  doc.text("販売清算確認書",hX,18);
+  doc.text("納品清算確認書",hX,18);
 
   // タイトル下：左に会社名、右に住所（PDFのみ）
   doc.setFont("NotoSansJP","normal");
